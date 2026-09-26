@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
 from auth import create_access_token, hash_password, verify_password
@@ -30,6 +30,12 @@ Base.metadata.create_all(bind=engine)
 @app.get("/")
 def read_root():
     return {"message": "Help Desk Issue Tracker API is running"}
+
+
+@app.get("/health")
+def health_check(database: Annotated[Session, Depends(get_db)]):
+    database.execute(text("SELECT 1"))
+    return {"status": "healthy"}
 
 
 @app.post(

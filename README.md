@@ -1,5 +1,7 @@
 # Help Desk Issue Tracker
 
+[![CI](https://github.com/dalidaguney/help-desk-issue-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/dalidaguney/help-desk-issue-tracker/actions/workflows/ci.yml)
+
 A REST API for managing help desk tickets, users, and comments. Built with FastAPI, SQLAlchemy, and SQLite.
 
 ## Features
@@ -15,6 +17,9 @@ A REST API for managing help desk tickets, users, and comments. Built with FastA
 - Ticket status and priority validation
 - Interactive Swagger API documentation
 - SQLite persistence
+- Docker image running as a non-root user
+- Persistent Docker volume and container health check
+- GitHub Actions checks for tests and code quality
 
 ## Technologies
 
@@ -77,6 +82,29 @@ The application creates its database tables on startup. SQLite data is stored in
 
 The reload option is intended for local development.
 
+## Run with Docker
+
+Create `.env` as described above, then run:
+
+```bash
+docker compose up --build
+```
+
+Open:
+
+- API: http://127.0.0.1:8000
+- Swagger documentation: http://127.0.0.1:8000/docs
+- Health check: http://127.0.0.1:8000/health
+
+Stop the containers with:
+
+```bash
+docker compose down
+```
+
+The named Docker volume keeps the SQLite database after the container stops.
+Use `docker compose down -v` only when you want to delete that stored data.
+
 ## Automated Tests
 
 Install the development dependencies, then run:
@@ -105,6 +133,7 @@ Swagger adds the `Bearer` prefix automatically. If the token expires, log in aga
 | Method | Endpoint                        | Description                         |
 | ------ | ------------------------------- | ----------------------------------- |
 | GET    | `/`                             | View the API status message         |
+| GET    | `/health`                       | Check API and database health       |
 | POST   | `/users`                        | Register an employee account        |
 | POST   | `/login`                        | Receive an access token             |
 | GET    | `/me`                           | View the authenticated user         |
@@ -214,7 +243,28 @@ Administrators can:
 - Update and assign tickets
 - Delete tickets
 
-There is currently no administrator provisioning command or role-management endpoint. A new installation starts without an administrator account; administrator-only operations require a separately provisioned administrator.
+Create the first administrator from the project directory. The password is
+requested securely and is not stored in shell history:
+
+```bash
+python manage.py create-admin --username admin --email admin@example.com
+```
+
+When using Docker, run:
+
+```bash
+docker compose exec api python manage.py create-admin --username admin --email admin@example.com
+```
+
+Public registration always creates an employee account, so users cannot grant
+themselves administrator permissions.
+
+## Continuous Integration
+
+GitHub Actions runs on every push to `main` and on every pull request. The
+workflow installs the development dependencies, checks the code with Ruff, and
+runs the automated API tests. A failed check is visible on GitHub before code is
+merged.
 
 ## Response Codes
 
@@ -231,10 +281,16 @@ There is currently no administrator provisioning command or role-management endp
 
 ```text
 help-desk-issue-tracker/
+├── .github/workflows/ci.yml
+├── .dockerignore
+├── .env.example
+├── Dockerfile
 ├── app.py
 ├── auth.py
+├── compose.yaml
 ├── database.py
 ├── dependencies.py
+├── manage.py
 ├── models.py
 ├── schemas.py
 ├── requirements.txt
@@ -250,4 +306,7 @@ Local files created during setup or use include `.env`, `.venv/`, and `helpdesk.
 
 ## Project Status
 
-This is a learning and portfolio project with a working API and automated API tests. It does not currently include a graphical user interface or production deployment configuration.
+This portfolio project has a working API, authentication and authorization,
+automated tests, code-quality checks, container packaging, persistent container
+storage, health monitoring, and continuous integration. A graphical user
+interface is outside the current project scope.

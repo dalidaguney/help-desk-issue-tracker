@@ -65,6 +65,13 @@ def login_user(client, username):
     return {"Authorization": f"Bearer {token}"}
 
 
+def test_health_check(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
+
+
 def test_registration_login_and_profile(client):
     user = register_user(client, "employee")
 

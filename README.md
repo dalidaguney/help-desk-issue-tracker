@@ -44,6 +44,12 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
+For development and automated tests, install:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
 ### 4. Configure the signing key
 
 Run this command once from the project directory to create a local `.env` file with a randomly generated key:
@@ -70,6 +76,17 @@ The application creates its database tables on startup. SQLite data is stored in
 - Swagger documentation: http://127.0.0.1:8000/docs
 
 The reload option is intended for local development.
+
+## Automated Tests
+
+Install the development dependencies, then run:
+
+```bash
+pytest
+```
+
+The tests use a separate in-memory database. They do not modify the local
+`helpdesk.db` file.
 
 ## Using Swagger
 
@@ -221,6 +238,10 @@ help-desk-issue-tracker/
 ├── models.py
 ├── schemas.py
 ├── requirements.txt
+├── requirements-dev.txt
+├── tests/
+│   ├── conftest.py
+│   └── test_api.py
 ├── .gitignore
 └── README.md
 ```
@@ -229,4 +250,4 @@ Local files created during setup or use include `.env`, `.venv/`, and `helpdesk.
 
 ## Project Status
 
-This is a learning and portfolio project with a working API. It does not currently include a graphical user interface, a committed automated test suite, or production deployment configuration.
+This is a learning and portfolio project with a working API and automated API tests. It does not currently include a graphical user interface or production deployment configuration.
